@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>動物英文測驗</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; }
+        #reader { width: 300px; margin: 20px auto; }
+        img { width: 200px; height: 200px; }
+    </style>
+</head>
+<body>
+    <h1>動物英文測驗 (第 <span id="qCount">1</span> 題)</h1>
+    <div id="quiz">
+        <img id="animalImg" src="" alt="請稍候">
+        <p id="feedback">請掃描卡片背面的 QR Code</p>
+    </div>
+    <div id="reader"></div>
+    <h3>目前得分：<span id="score">0</span></h3>
+
+    <script>
+        const mapping = { "1": "狗", "2": "貓", "3": "牛", "4": "羊" }; // [cite: 37]
+        let score = 0, count = 1, currentId = "";
+
+        function nextQuestion() {
+            if (count > 10) { // [cite: 35]
+                alert("遊戲結束！最終得分：" + score);
+                location.reload();
+                return;
+            }
+            currentId = Math.floor(Math.random() * 4 + 1).toString(); // 隨機出題 [cite: 35]
+            document.getElementById('animalImg').src = `assets/images/${currentId}.png`; // [cite: 36]
+            new Audio(`assets/audio/${currentId}.mp3`).play(); // [cite: 36]
+            document.getElementById('qCount').innerText = count;
+        }
+
+        function onScanSuccess(decodedText) { // [cite: 38]
+            if (decodedText === currentId) {
+                score++;
+                document.getElementById('score').innerText = score;
+                alert("答對了！");
+                count++;
+                nextQuestion();
+            } else {
+                alert("再試一次！這是 " + mapping[currentId] + " 嗎？");
+            }
+        }
+
+        const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+        nextQuestion();
+    </script>
+</body>
+</html>
