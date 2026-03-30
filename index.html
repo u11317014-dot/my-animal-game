@@ -2,32 +2,54 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>動物英文測驗 - 穩定版</title>
+    <title>動物英文測驗</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: 'Microsoft JhengHei', sans-serif; text-align: center; background-color: #f4f4f4; padding: 20px; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        #animalImg { width: 250px; height: 250px; object-fit: cover; border-radius: 10px; border: 3px solid #eee; margin: 15px 0; }
-        #reader { width: 100%; margin: 20px 0; border-radius: 10px; overflow: hidden; }
-        .info { color: #666; font-size: 0.9em; margin-bottom: 10px; }
-        #feedback { font-weight: bold; font-size: 1.2em; min-height: 1.5em; margin: 10px 0; }
-        .score-board { font-size: 1.2em; background: #e8f5e9; padding: 10px; border-radius: 8px; margin-bottom: 20px; }
-        button { padding: 12px 24px; font-size: 1.1em; background: #4CAF50; color: white; border: none; border-radius: 25px; cursor: pointer; }
+        body { font-family: sans-serif; text-align: center; }
+        #reader { width: 300px; margin: 20px auto; }
+        img { width: 200px; height: 200px; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>🐾 動物英文測驗</h1>
-    
-    <div class="score-board">
-        第 <span id="qCount">1</span> / 10 題 | 目前得分：<span id="score">0</span>
+    <h1>動物英文測驗 (第 <span id="qCount">1</span> 題)</h1>
+    <div id="quiz">
+        <img id="animalImg" src="" alt="請稍候">
+        <p id="feedback">請掃描卡片背面的 QR Code</p>
     </div>
+    <div id="reader"></div>
+    <h3>目前得分：<span id="score">0</span></h3>
 
-    <div id="quiz-box">
-        <div class="info" id="debug-path">準備中...</div>
-        <img id="animalImg" src="" alt="題目圖片載入中...">
-        <div id="feedback">請點擊下方按鈕開始</div>
-        <button id="startBtn" onclick="initGame()">開始遊戲</button>
-    </div>
+    <script>
+        const mapping = { "1": "狗", "2": "貓", "3": "牛", "4": "羊" }; // [cite: 37]
+        let score = 0, count = 1, currentId = "";
+
+        function nextQuestion() {
+            if (count > 10) { // [cite: 35]
+                alert("遊戲結束！最終得分：" + score);
+                location.reload();
+                return;
+            }
+            currentId = Math.floor(Math.random() * 4 + 1).toString(); // 隨機出題 [cite: 35]
+            document.getElementById('animalImg').src = `assets/images/${currentId}.png`; // [cite: 36]
+            new Audio(`assets/audio/${currentId}.mp3`).play(); // [cite: 36]
+            document.getElementById('qCount').innerText = count;
+        }
+
+        function onScanSuccess(decodedText) { // [cite: 38]
+            if (decodedText === currentId) {
+                score++;
+                document.getElementById('score').innerText = score;
+                alert("答對了！");
+                count++;
+                nextQuestion();
+            } else {
+                alert("再試一次！這是 " + mapping[currentId] + " 嗎？");
+            }
+        }
+
+        const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+        nextQuestion();
+    </script>
+</body>
+</html>
